@@ -1,0 +1,9 @@
+# Ignore macOS system files
+.DS_Store
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore the 'temp_data' directory
+/temp_data/
