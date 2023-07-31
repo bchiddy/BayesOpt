@@ -1,13 +1,13 @@
 ---
-title: "R Notebook"
-output: html_notebook
-editor_options: 
-  chunk_output_type: console
+title: "Analysis of Hyperparameter Tuning Techniques"
+output:
+  html_document:
+    df_print: paged
 ---
 
 Set directory 
 
-```{r}
+```{r, eval=FALSE, include=FALSE}
 setwd("/Users/benchiddy/UCT/Gaussian Processes/Coding")
 rm(list = ls())
 ```
@@ -15,7 +15,7 @@ rm(list = ls())
 Let's first load the MNIST data set and spilt into training and test sets. Note
 that we also scale the data.
 
-```{r}
+```{r, eval=FALSE}
 require(dplyr)
 require(laGP)
 require(lhs)
@@ -47,7 +47,7 @@ x_test   <- x_test / 255
 Next lets create a Neural networ with enough capacity to overfit the problem
 of classifying correct digits.
 
-```{r}
+```{r, eval=FALSE}
 modelnn <- function(alpha=0.5, lambda=0.2, epochs=30, vbose=0)
 {
   #' Wrapper function for a (256, 128) Neural Network. Function allows for
@@ -117,7 +117,7 @@ modelnn(epochs=1)
 
 Random Search
 
-```{r}
+```{r, eval=FALSE}
 random_search <- function(f, n=25, num_par=2, hmin=0, hmax=1, names)
 {
   #' Proposes n sets of hp vectors within stated bounds using Latin Hypercube 
@@ -154,7 +154,7 @@ random_search <- function(f, n=25, num_par=2, hmin=0, hmax=1, names)
 
 Grid search
 
-```{r}
+```{r, eval=FALSE}
 grid_search <- function(f, points, names)
 {
   #' Creates a grid containing all possible combinations of proposed hp values.
@@ -207,7 +207,7 @@ grid_search <- function(f, points, names)
 
 Bayesian Optimization main wrapper
 
-```{r}
+```{r, eval=FALSE}
 bayes_opt <- function(f, ninit, num_par, hmin, hmax, 
                       end, names, type="pi", plt=FALSE)
 {
@@ -304,7 +304,7 @@ bayes_opt <- function(f, ninit, num_par, hmin, hmax,
 
 Predicted improvement
 
-```{r}
+```{r, eval=FALSE}
 predicted_value <- function(x, gpi) 
 {
   #' Helper function for Predicted Improvement acquisition strategy. Returns
@@ -355,23 +355,23 @@ predicted_improvement <- function(f, gpi, X, y, xx, XX, states,
     
     ## Using the current minimum as an initial value use L-BFGS-B to obtain
     ## the predicted global minimum hp values based on the GP Surrogate.
-    m <- which.min(y)
-    hparams <- optim(X[m,], predicted_value, lower=0.001, upper=0.999, 
+    m         <- which.min(y)
+    hparams   <- optim(X[m,], predicted_value, lower=0.001, upper=0.999, 
                      method="L-BFGS-B", gpi=gpi)$par
-    ynew <- do.call(f, as.list(hparams)) # Run f at proposed hp values.
+    ynew      <- do.call(f, as.list(hparams)) # Run f at proposed hp values.
     
     ## Update GP Surrogate based on new information
     updateGPsep(gpi, matrix(hparams, nrow=1), ynew) 
     mleGPsep(gpi, param="d", tmin=da$min, tmax=da$max, ab=da$ab) 
     
     ## Update dataset on hp space
-    X <- rbind(X, hparams)
-    rownames(X) <- NULL # Reset row names. Assists with plotting.
-    y <- c(y, ynew)
+    X            <- rbind(X, hparams)
+    rownames(X)  <- NULL # Reset row names. Assists with plotting.
+    y            <- c(y, ynew)
     
     ## Log predictive surface at current timestep.
-    states[[step]] <- predGPsep(gpi, XX)$mean
-    step <- step + 1 
+    states[[step]]  <- predGPsep(gpi, XX)$mean
+    step            <- step + 1 
     
     ## Plots current predictive surface for hp space
     if (plt) 
@@ -408,7 +408,7 @@ predicted_improvement <- function(f, gpi, X, y, xx, XX, states,
 
 Bake-off between tuning techniques.
 
-```{r}
+```{r, eval=FALSE}
 data <- data.frame()
 runs <- 2
 
@@ -510,7 +510,7 @@ write.csv(data, "data/most_recent_mc.csv")
 
 Plotting results. Very messy, planning to clean.
 
-```{r}
+```{r, eval=FALSE}
 ## Best objective function value
 bov <- function(y, end=length(y)) 
 {
